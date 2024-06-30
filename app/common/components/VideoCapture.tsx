@@ -30,8 +30,9 @@ const VideoCapture = () => {
   }, [initialized, startRecording]);
 
   return (
-    <div className="relative">
-      <video ref={videoRef} width="640" height="480" />
+    <div>
+      {isError && <p className="text-red-400">Error occured</p>}
+      <video ref={videoRef} width="640" height="480" playsInline autoPlay />
       <canvas ref={canvasRef} width="640" height="480" />
     </div>
   );
