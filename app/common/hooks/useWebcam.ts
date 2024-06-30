@@ -20,6 +20,7 @@ export const useWebcam = () => {
       });
       setMediaStream(response);
     } catch (error) {
+      console.log(error);
       setIsError(true);
     }
     setInitialized(true);
