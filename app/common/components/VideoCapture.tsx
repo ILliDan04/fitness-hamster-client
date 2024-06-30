@@ -1,16 +1,16 @@
 import React, { useRef, useEffect } from "react";
 
 import { useWebcam } from "../hooks/useWebcam";
-// import { usePoseDetection } from "../hooks/usePoseDetection";
+import { usePoseDetection } from "../hooks/usePoseDetection";
 
 const VideoCapture = () => {
   const { startRecording, mediaStream, initialized, isError } = useWebcam();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  // const detection = usePoseDetection({
-  //   video: videoRef.current,
-  //   canvas: canvasRef.current,
-  // });
+  const detection = usePoseDetection({
+    video: videoRef.current,
+    canvas: canvasRef.current,
+  });
 
   useEffect(() => {
     if (initialized && !isError && videoRef.current) {
@@ -23,11 +23,11 @@ const VideoCapture = () => {
     const init = async () => {
       if (!initialized) {
         await startRecording();
-        // detection.start();
+        detection.start();
       }
     };
     init();
-  }, [initialized, startRecording]);
+  }, [initialized, detection, startRecording]);
 
   return (
     <div>
