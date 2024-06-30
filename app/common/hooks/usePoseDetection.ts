@@ -104,7 +104,14 @@ export const usePoseDetection = ({ canvas, video }: VideoData) => {
 
   useEffect(() => {
     const init = async () => {
-      await tf.setBackend("webgpu");
+      if (tf.engine().findBackend("webgpu")) {
+        await tf.setBackend("webgpu");
+      } else if (tf.engine().findBackend("webgl")) {
+        await tf.setBackend("webgl");
+      } else {
+        await tf.setBackend("cpu");
+      }
+      await tf.ready();
 
       const detector = await createDetector(SupportedModels.MoveNet);
       setDetector(detector);
