@@ -24,6 +24,7 @@ export const usePoseDetection = ({ canvas, video }: VideoData) => {
   const toggle = useCallback(() => setDetecting((value) => !value), []);
 
   const ctx = useMemo(() => canvas?.getContext("2d") ?? null, [canvas]);
+
   const canRender = useMemo(() => {
     return !!(canvas && video && ctx && detector && video.readyState === 4);
   }, [canvas, video, detector, ctx]);
