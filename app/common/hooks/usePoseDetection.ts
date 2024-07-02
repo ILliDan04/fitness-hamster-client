@@ -15,6 +15,11 @@ type VideoData = {
   canvas: HTMLCanvasElement | null;
 };
 
+export const CANVAS_SIZE = {
+  width: 600,
+  height: 800,
+};
+
 export const usePoseDetection = ({ canvas, video }: VideoData) => {
   const [detecting, setDetecting] = useState(false);
   const [detector, setDetector] = useState<PoseDetector | null>(null);
@@ -42,13 +47,13 @@ export const usePoseDetection = ({ canvas, video }: VideoData) => {
     (pose: Pose) => {
       if (!canRender) return;
 
-      ctx!.clearRect(0, 0, video!.width, video!.height);
-      ctx!.drawImage(video!, 0, 0, video!.width, video!.height);
+      ctx!.clearRect(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
+      ctx!.drawImage(video!, 0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
 
       pose.keypoints.forEach(({ x, y, score }) => {
         if (score && score > 0.5) {
           ctx!.beginPath();
-          ctx!.arc(x, y, 5, 0, 2 * Math.PI);
+          ctx!.arc(x, y, 10, 0, 2 * Math.PI);
           ctx!.fillStyle = "red";
           ctx!.fill();
         }
@@ -68,7 +73,7 @@ export const usePoseDetection = ({ canvas, video }: VideoData) => {
         }
       });
     },
-    [ctx, video, canRender]
+    [canRender, ctx, video]
   );
 
   const detectBicepsCurls = useCallback(

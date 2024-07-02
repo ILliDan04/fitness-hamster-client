@@ -3,35 +3,25 @@
 import React, { useRef, useEffect, useMemo } from "react";
 
 import { useWebcam } from "../hooks/useWebcam";
-import { usePoseDetection } from "../hooks/usePoseDetection";
-import { useBreakpoints } from "../hooks/useBreakpoints";
+import { CANVAS_SIZE, usePoseDetection } from "../hooks/usePoseDetection";
 
 const VideoCapture = () => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
   const {
     startRecording,
     mediaStream,
     initialized,
     isError,
     error,
-    aspectRatio,
+    canRecord,
+    ready,
   } = useWebcam();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { containerWidth, ready } = useBreakpoints();
   const detection = usePoseDetection({
     video: videoRef.current,
     canvas: canvasRef.current,
   });
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        // @ts-ignore
-        await screen.orientation.lock("any");
-      } catch (error) {}
-    };
-    init();
-  }, []);
 
   useEffect(() => {
     if (initialized && !isError && videoRef.current) {
@@ -42,35 +32,42 @@ const VideoCapture = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (!initialized && ready) {
+      if (!initialized && canRecord) {
         await startRecording();
         detection.start();
       }
     };
     init();
-  }, [initialized, detection, startRecording, ready]);
+  }, [initialized, detection, startRecording, canRecord]);
 
   return useMemo(
     () => (
-      <div className="container relative">
-        {isError && <p className="text-red-400">{error}</p>}
-        <video
-          ref={videoRef}
-          width={containerWidth}
-          height={containerWidth / aspectRatio}
-          playsInline
-          className="absolute"
-          autoPlay
-        />
-        <canvas
-          ref={canvasRef}
-          width={containerWidth}
-          height={containerWidth / aspectRatio}
-          className="absolute z-10"
-        />
+      <div>
+        <div className="container">
+          <div className="relative">
+            {!canRecord && ready && (
+              <p className="text-yellow-600">
+                Please use the default orientation of your device
+              </p>
+            )}
+            {isError && <p className="text-red-400">{error}</p>}
+            <video
+              ref={videoRef}
+              playsInline
+              className="absolute w-full"
+              autoPlay
+            />
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_SIZE.width}
+              height={CANVAS_SIZE.height}
+              className="absolute z-10 w-full"
+            />
+          </div>
+        </div>
       </div>
     ),
-    [aspectRatio, containerWidth, error, isError]
+    [canRecord, error, isError, ready]
   );
 };
 

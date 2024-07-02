@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useScreenOrientation } from "../context/ScreenOrientationContext";
 import {
   BREAKPOINTS,
   BREAKPOINT_VALUES,
@@ -6,15 +7,7 @@ import {
 } from "../utils/breakpoints";
 
 export const useBreakpoints = () => {
-  const [appWindow, setAppWindow] = useState<Window | null>(null);
-
-  const screenWidth = useMemo(() => {
-    return appWindow?.screen.width ?? Number.MAX_SAFE_INTEGER;
-  }, [appWindow]);
-
-  useEffect(() => {
-    setAppWindow(window);
-  }, []);
+  const { screenWidth, ready } = useScreenOrientation();
 
   const breakpoint = useMemo(() => {
     if (screenWidth < BREAKPOINT_VALUES.sm) {
@@ -49,11 +42,5 @@ export const useBreakpoints = () => {
     return CONTAINER_SIZE[breakpoint];
   }, [breakpoint, screenWidth]);
 
-  return {
-    containerWidth,
-    breakpointValue,
-    breakpoint,
-    screenWidth,
-    ready: !!appWindow,
-  };
+  return { breakpoint, breakpointValue, containerWidth, ready };
 };

@@ -1,27 +1,32 @@
-import { useCallback, useState } from "react";
-import { useBreakpoints } from "./useBreakpoints";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useScreenOrientation } from "../context/ScreenOrientationContext";
+import { CANVAS_SIZE } from "./usePoseDetection";
+
+const ASPECT_RATIO = 4 / 3;
 
 export const useWebcam = () => {
-  const { containerWidth, ready } = useBreakpoints();
+  const { ready, isPortraitOrientation, angle } = useScreenOrientation();
 
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState("");
   const [isError, setIsError] = useState(false);
+  const [canRecord, setCanRecord] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  const reset = useCallback(() => {
-    setMediaStream(null);
-    setError("");
-    setIsError(false);
-    setInitialized(false);
-  }, []);
+  useEffect(() => {
+    setCanRecord(ready && angle === 0);
+  }, [angle, ready]);
+
+  const aspectRatio = useMemo(
+    () => (isPortraitOrientation ? ASPECT_RATIO : 1 / ASPECT_RATIO),
+    [isPortraitOrientation]
+  );
 
   const startRecording = useCallback(async () => {
-    if (!ready) {
+    if (!canRecord) {
       return;
     }
 
-    reset();
     try {
       if (
         !(
@@ -35,9 +40,11 @@ export const useWebcam = () => {
       const response = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
-          facingMode: "user",
-          aspectRatio: 0.75,
-          width: containerWidth,
+          facingMode: { ideal: "user" },
+          width: isPortraitOrientation ? CANVAS_SIZE.height : CANVAS_SIZE.width,
+          height: isPortraitOrientation
+            ? CANVAS_SIZE.width
+            : CANVAS_SIZE.height,
         },
       });
 
@@ -50,7 +57,7 @@ export const useWebcam = () => {
       setIsError(true);
     }
     setInitialized(true);
-  }, [containerWidth, reset, ready]);
+  }, [isPortraitOrientation, canRecord]);
 
   return {
     mediaStream,
@@ -58,6 +65,8 @@ export const useWebcam = () => {
     initialized,
     startRecording,
     error,
-    aspectRatio: 0.75,
+    aspectRatio: aspectRatio,
+    canRecord,
+    ready,
   };
 };
