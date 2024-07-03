@@ -55,7 +55,8 @@ const VideoCapture = () => {
               ref={videoRef}
               playsInline
               className="absolute w-full"
-              autoPlay
+              muted
+              preload="none"
             />
             <canvas
               ref={canvasRef}
