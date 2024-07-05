@@ -1,18 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Keypoint,
-  Pose,
   PoseDetector,
   SupportedModels,
   createDetector,
-  util,
 } from "@tensorflow-models/pose-detection";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgpu";
+import { detectPose, detectSquats } from "../utils/poseDetection";
 
 type VideoData = {
   video: HTMLVideoElement | null;
   canvas: HTMLCanvasElement | null;
+  exerciseToDetect?: "squats";
 };
 
 export const CANVAS_SIZE = {
@@ -20,93 +19,57 @@ export const CANVAS_SIZE = {
   height: 800,
 };
 
-export const usePoseDetection = ({ canvas, video }: VideoData) => {
+export const usePoseDetection = ({
+  canvas,
+  video,
+  exerciseToDetect,
+}: VideoData) => {
+  const [totalReps, setTotalReps] = useState(0);
+  const [repInProgress, setRepInProgress] = useState(false);
   const [detecting, setDetecting] = useState(false);
   const [detector, setDetector] = useState<PoseDetector | null>(null);
+
+  const requestRef = useRef(0);
+  const previousTimeRef = useRef(0);
+
+  const ctx = useMemo(() => canvas?.getContext("2d") ?? null, [canvas]);
 
   const start = useCallback(() => setDetecting(true), []);
   const stop = useCallback(() => setDetecting(false), []);
   const toggle = useCallback(() => setDetecting((value) => !value), []);
 
-  const ctx = useMemo(() => canvas?.getContext("2d") ?? null, [canvas]);
-
-  const canRender = useMemo(() => {
-    return !!(canvas && video && ctx && detector && video.readyState === 4);
-  }, [canvas, video, detector, ctx]);
-
-  const calculateAngle = useCallback(
-    (a: Keypoint, b: Keypoint, c: Keypoint) => {
-      const radians =
-        Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
-      return Math.abs((radians * 180) / Math.PI);
-    },
-    []
-  );
-
-  const drawPose = useCallback(
-    (pose: Pose) => {
-      if (!canRender) return;
-
-      ctx!.clearRect(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
-      ctx!.drawImage(video!, 0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
-
-      pose.keypoints.forEach(({ x, y, score }) => {
-        if (score && score > 0.5) {
-          ctx!.beginPath();
-          ctx!.arc(x, y, 10, 0, 2 * Math.PI);
-          ctx!.fillStyle = "red";
-          ctx!.fill();
-        }
-      });
-
-      const adjacentKeyPoints = util.getAdjacentPairs(SupportedModels.MoveNet);
-      adjacentKeyPoints.forEach(([i, j]) => {
-        const kp1 = pose.keypoints[i];
-        const kp2 = pose.keypoints[j];
-
-        if ((kp1.score ?? 0) > 0.5 && (kp2.score ?? 0) > 0.5) {
-          ctx!.beginPath();
-          ctx!.moveTo(kp1.x, kp1.y);
-          ctx!.lineTo(kp2.x, kp2.y);
-          ctx!.strokeStyle = "red";
-          ctx!.stroke();
-        }
-      });
-    },
-    [canRender, ctx, video]
-  );
-
-  const detectBicepsCurls = useCallback(
-    (pose: Pose) => {
-      const leftElbow = pose.keypoints.find((k) => k.name === "left_elbow");
-      const leftWrist = pose.keypoints.find((k) => k.name === "left_wrist");
-      const leftShoulder = pose.keypoints.find(
-        (k) => k.name === "left_shoulder"
-      );
-
-      if (leftElbow && leftWrist && leftShoulder) {
-        const angle = calculateAngle(leftShoulder, leftElbow, leftWrist);
-        // console.log(`Left arm angle: ${angle}`);
-        if (angle < 45) {
-          // console.log("Biceps curl detected");
+  const run = useCallback(
+    async (time: number) => {
+      if (
+        previousTimeRef.current != undefined &&
+        detector &&
+        video &&
+        ctx &&
+        detecting
+      ) {
+        const pose = await detectPose(detector, video, ctx);
+        if (exerciseToDetect === "squats" && pose) {
+          detectSquats(
+            pose,
+            repInProgress,
+            () => setRepInProgress(true),
+            () => {
+              setRepInProgress(false);
+              setTotalReps((r) => r + 1);
+            }
+          );
         }
       }
+      previousTimeRef.current = time;
+      requestRef.current = requestAnimationFrame(run);
     },
-    [calculateAngle]
+    [ctx, detecting, detector, exerciseToDetect, repInProgress, video]
   );
 
-  const detectPose = useCallback(async () => {
-    if (!canRender) return;
-
-    const poses = await detector!.estimatePoses(video!);
-
-    if (poses.length > 0) {
-      const pose = poses[0];
-      drawPose(pose);
-      detectBicepsCurls(pose);
-    }
-    requestAnimationFrame(() => detectPose());
-  }, [canRender, detectBicepsCurls, detector, drawPose, video]);
+  useEffect(() => {
+    requestRef.current = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(requestRef.current);
+  }, [run]);
 
   useEffect(() => {
     const init = async () => {
@@ -125,11 +88,5 @@ export const usePoseDetection = ({ canvas, video }: VideoData) => {
     init();
   }, []);
 
-  useEffect(() => {
-    if (detecting && canRender) {
-      detectPose();
-    }
-  }, [canRender, detectPose, detecting]);
-
-  return { detecting, start, stop, toggle };
+  return { detecting, start, stop, toggle, totalReps };
 };
