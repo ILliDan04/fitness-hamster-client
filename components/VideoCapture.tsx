@@ -2,8 +2,11 @@
 
 import React, { useRef, useEffect } from "react";
 
-import { useWebcam } from "../hooks/useWebcam";
-import { CANVAS_SIZE, usePoseDetection } from "../hooks/usePoseDetection";
+import { useWebcam } from "../common/hooks/useWebcam";
+import {
+  CANVAS_SIZE,
+  usePoseDetection,
+} from "../common/hooks/usePoseDetection";
 
 const VideoCapture = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);

@@ -1,11 +1,13 @@
 "use client";
-import VideoCapture from "./common/components/VideoCapture";
-import { ScreenOrientationContext } from "./common/context/ScreenOrientationContext";
+import Login from "@/pages/Login";
+import VideoCapture from "../components/VideoCapture";
+import { ScreenOrientationContext } from "../common/context/ScreenOrientationContext";
 
 export default function Home() {
   return (
-    <ScreenOrientationContext>
-      <VideoCapture />
-    </ScreenOrientationContext>
+    <Login></Login>
+    // <ScreenOrientationContext>
+    //   <VideoCapture />
+    // </ScreenOrientationContext>
   );
 }
