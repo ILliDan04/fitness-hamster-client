@@ -1,9 +1,4 @@
-import React, {
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { PropsWithChildren, useEffect, useState } from "react";
 
 type ScreenOrientationContextType = {
   ready: boolean;
@@ -12,7 +7,7 @@ type ScreenOrientationContextType = {
   angle: number;
 };
 
-const screenOrientationContext =
+export const screenOrientationContext =
   React.createContext<ScreenOrientationContextType>({
     ready: false,
     screenWidth: 0,
@@ -20,9 +15,7 @@ const screenOrientationContext =
     angle: 0,
   });
 
-export const ScreenOrientationContext = ({
-  children,
-}: PropsWithChildren<{}>) => {
+export const ScreenOrientationContext = ({ children }: PropsWithChildren) => {
   const [appWindow, setAppWindow] = useState<Window | null>(null);
   const [isPortraitOrientation, setIsPortraitOrientation] = useState(false);
   const [screenWidth, setScreenWidth] = useState(0);
@@ -62,8 +55,4 @@ export const ScreenOrientationContext = ({
       {children}
     </screenOrientationContext.Provider>
   );
-};
-
-export const useScreenOrientation = () => {
-  return useContext(screenOrientationContext);
 };

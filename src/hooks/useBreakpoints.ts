@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useScreenOrientation } from "../context/ScreenOrientationContext";
+import { useScreenOrientation } from "../common/context/ScreenOrientationContext";
 import {
   BREAKPOINTS,
   BREAKPOINT_VALUES,
