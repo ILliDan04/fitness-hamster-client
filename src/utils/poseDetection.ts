@@ -6,6 +6,33 @@ import {
   util,
 } from "@tensorflow-models/pose-detection";
 
+type KeypointName =
+  | "nose"
+  | "left_eye"
+  | "right_eye"
+  | "left_ear"
+  | "right_ear"
+  | "left_shoulder"
+  | "right_shoulder"
+  | "left_elbow"
+  | "right_elbow"
+  | "left_wrist"
+  | "right_wrist"
+  | "left_hip"
+  | "right_hip"
+  | "left_knee"
+  | "right_knee"
+  | "left_ankle"
+  | "right_ankle";
+
+const facePoints: KeypointName[] = [
+  "nose",
+  "left_eye",
+  "right_eye",
+  "left_ear",
+  "right_ear",
+];
+
 export const CANVAS_SIZE = {
   width: 600,
   height: 800,
@@ -26,20 +53,28 @@ const drawPose = (
   ctx!.clearRect(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
   ctx!.drawImage(video, 0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
 
-  pose.keypoints.forEach(({ x, y, score }) => {
-    if (score && score > 0.5) {
-      ctx.beginPath();
-      ctx.arc(x, y, 10, 0, 2 * Math.PI);
-      ctx.fillStyle = "red";
-      ctx.fill();
-    }
-  });
+  pose.keypoints
+    .filter(({ name }) => !facePoints.includes(name as KeypointName))
+    .forEach(({ x, y, score }) => {
+      if (score && score > 0.5) {
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
+        ctx.fill();
+      }
+    });
 
   const adjacentKeyPoints = util.getAdjacentPairs(SupportedModels.MoveNet);
   adjacentKeyPoints.forEach(([i, j]) => {
     const kp1 = pose.keypoints[i];
     const kp2 = pose.keypoints[j];
 
+    if (
+      facePoints.includes(kp1.name as KeypointName) ||
+      facePoints.includes(kp2.name as KeypointName)
+    ) {
+      return;
+    }
     if ((kp1.score ?? 0) > 0.5 && (kp2.score ?? 0) > 0.5) {
       ctx!.beginPath();
       ctx!.moveTo(kp1.x, kp1.y);

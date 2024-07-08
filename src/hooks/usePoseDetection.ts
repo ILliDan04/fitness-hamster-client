@@ -8,10 +8,12 @@ import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgpu";
 import { detectPose, detectSquats } from "../utils/poseDetection";
 
+export type Exercise = "squats";
+
 type VideoData = {
-  video: HTMLVideoElement | null;
-  canvas: HTMLCanvasElement | null;
-  exerciseToDetect?: "squats";
+  video?: HTMLVideoElement | null;
+  canvas?: HTMLCanvasElement | null;
+  exerciseToDetect?: Exercise;
 };
 
 export const CANVAS_SIZE = {

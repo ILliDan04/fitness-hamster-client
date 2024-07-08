@@ -1,21 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useScreenOrientation } from "../context/ScreenOrientationContext";
+import { useCallback, useMemo, useState } from "react";
 import { CANVAS_SIZE } from "./usePoseDetection";
+import { useScreenOrientation } from "./useScreenOrientation";
 
 const ASPECT_RATIO = 4 / 3;
 
 export const useWebcam = () => {
-  const { ready, isPortraitOrientation, angle } = useScreenOrientation();
+  const { isPortraitOrientation, angle } = useScreenOrientation();
 
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState("");
   const [isError, setIsError] = useState(false);
-  const [canRecord, setCanRecord] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  useEffect(() => {
-    setCanRecord(ready && angle === 0);
-  }, [angle, ready]);
+  const canRecord = useMemo(() => angle === 0, [angle]);
 
   const aspectRatio = useMemo(
     () => (isPortraitOrientation ? ASPECT_RATIO : 1 / ASPECT_RATIO),
@@ -67,6 +64,5 @@ export const useWebcam = () => {
     error,
     aspectRatio: aspectRatio,
     canRecord,
-    ready,
   };
 };

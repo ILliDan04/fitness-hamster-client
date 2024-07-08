@@ -1,11 +1,24 @@
-"use client";
+import {
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+} from "react";
 
-import React, { useRef, useEffect } from "react";
+import { useWebcam } from "@/hooks/useWebcam";
+import { CANVAS_SIZE } from "@/hooks/usePoseDetection";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
-import { useWebcam } from "../hooks/useWebcam";
-import { CANVAS_SIZE, usePoseDetection } from "../hooks/usePoseDetection";
+export type VideoCaptureRef = {
+  canvas?: HTMLCanvasElement | null;
+  video?: HTMLVideoElement | null;
+};
 
-const VideoCapture = () => {
+type Props = {};
+
+const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
+  const { width } = useBreakpoint();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -16,13 +29,12 @@ const VideoCapture = () => {
     isError,
     error,
     canRecord,
-    ready,
   } = useWebcam();
-  const detection = usePoseDetection({
-    video: videoRef.current,
+
+  useImperativeHandle(ref, () => ({
     canvas: canvasRef.current,
-    exerciseToDetect: "squats",
-  });
+    video: videoRef.current,
+  }));
 
   useEffect(() => {
     if (initialized && !isError && videoRef.current) {
@@ -35,27 +47,37 @@ const VideoCapture = () => {
     const init = async () => {
       if (!initialized && canRecord) {
         await startRecording();
-        detection.start();
       }
     };
     init();
-  }, [initialized, detection, startRecording, canRecord]);
+  }, [initialized, startRecording, canRecord]);
+
+  const containerHeight = useMemo(
+    () => (width === "100%" ? "133.333333333vw" : (width * 4) / 3),
+    [width]
+  );
 
   return (
     <div>
       <div className="container">
         <div className="relative">
-          {!canRecord && ready && (
+          {!canRecord && (
             <p className="text-yellow-600">
               Please use the default orientation of your device
             </p>
           )}
-          {<p className="text-7xl">{detection.totalReps}</p>}
-          {isError && <p className="text-red-400">{error}</p>}
+          {isError && (
+            <p
+              className="text-red-400 w-full bg-white"
+              style={{ height: containerHeight }}
+            >
+              {error}
+            </p>
+          )}
           <video
             ref={videoRef}
             playsInline
-            className="absolute w-full"
+            className={`absolute w-full ${isError ? "hidden" : ""}`}
             muted
             preload="none"
           />
@@ -63,12 +85,12 @@ const VideoCapture = () => {
             ref={canvasRef}
             width={CANVAS_SIZE.width}
             height={CANVAS_SIZE.height}
-            className="absolute z-10 w-full"
+            className={`absolute w-full z-10 ${isError ? "hidden" : ""}`}
           />
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default VideoCapture;
