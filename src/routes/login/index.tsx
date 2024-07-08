@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { createFileRoute } from "@tanstack/react-router";
 
 const Login = () => {
-  const { signIn } = useAuth();
+  const { signIn, signOut } = useAuth();
 
   return (
     <div className="bg-black">
@@ -14,13 +14,12 @@ const Login = () => {
         >
           Login
         </button>
-        {/* <button
-          onClick={logout}
+        <button
+          onClick={signOut}
           className="text-2xl bg-blue-200 rounded-full px-10 py-5"
         >
           Logout
-        </button> */}
-        {/* <p className="text-xl text-white">{account?.accountId}</p> */}
+        </button>
       </div>
     </div>
   );

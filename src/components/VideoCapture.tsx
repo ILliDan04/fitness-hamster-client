@@ -1,7 +1,14 @@
-import { useRef, useEffect, forwardRef, useImperativeHandle } from "react";
+import {
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+} from "react";
 
 import { useWebcam } from "@/hooks/useWebcam";
 import { CANVAS_SIZE } from "@/hooks/usePoseDetection";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 export type VideoCaptureRef = {
   canvas?: HTMLCanvasElement | null;
@@ -11,6 +18,7 @@ export type VideoCaptureRef = {
 type Props = {};
 
 const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
+  const { width } = useBreakpoint();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -21,13 +29,8 @@ const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
     isError,
     error,
     canRecord,
-    ready,
   } = useWebcam();
-  // const detection = usePoseDetection({
-  //   video: videoRef.current,
-  //   canvas: canvasRef.current,
-  //   exerciseToDetect,
-  // });
+
   useImperativeHandle(ref, () => ({
     canvas: canvasRef.current,
     video: videoRef.current,
@@ -44,23 +47,30 @@ const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
     const init = async () => {
       if (!initialized && canRecord) {
         await startRecording();
-        // detection.start();
       }
     };
     init();
   }, [initialized, startRecording, canRecord]);
 
+  const containerHeight = useMemo(
+    () => (width === "100%" ? "133.333333333vw" : (width * 4) / 3),
+    [width]
+  );
+
   return (
     <div>
       <div className="container">
         <div className="relative">
-          {!canRecord && ready && (
+          {!canRecord && (
             <p className="text-yellow-600">
               Please use the default orientation of your device
             </p>
           )}
           {isError && (
-            <p className="text-red-400 w-full h-[133.3333333vw] bg-white">
+            <p
+              className="text-red-400 w-full bg-white"
+              style={{ height: containerHeight }}
+            >
               {error}
             </p>
           )}

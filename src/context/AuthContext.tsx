@@ -35,13 +35,12 @@ const AuthContextProvider = ({ children }: PropsWithChildren) => {
 
     const cb = async () => {
       const here = await HereWallet.connect({
-        botId: "fitness_hamster_bot/fitness_hamster_app", // Your bot MiniApp
+        botId: "fitness_hamster_bot/fitness_hamster_app",
         walletId: "herewalletbot/beta",
         defaultStrategy: new TelegramAppStrategy(
           "fitness_hamster_bot/fitness_hamster_app",
           "herewalletbot/beta"
         ),
-        // walletId: "fittondev.near", // HOT Wallet
       });
       setWallet(here);
       const signed = await here.isSignedIn();
