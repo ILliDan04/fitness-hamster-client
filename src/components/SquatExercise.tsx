@@ -4,17 +4,22 @@ import VideoCapture, { VideoCaptureRef } from "./VideoCapture";
 
 const SquatExercise = () => {
   const videoCapture = useRef<VideoCaptureRef | null>(null);
-  const detection = usePoseDetection({
+  const { start, totalReps } = usePoseDetection({
     video: videoCapture.current?.video,
     canvas: videoCapture.current?.canvas,
     exerciseToDetect: "squats",
   });
 
   useEffect(() => {
-    detection.start();
-  }, [detection]);
+    start();
+  }, [start]);
 
-  return <VideoCapture ref={videoCapture} />;
+  return (
+    <div className="container">
+      <VideoCapture ref={videoCapture} />
+      <p className="text-4xl text-white">{totalReps}</p>
+    </div>
+  );
 };
 
 export default SquatExercise;

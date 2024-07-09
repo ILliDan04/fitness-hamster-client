@@ -6,19 +6,20 @@ import {
 } from "@tensorflow-models/pose-detection";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgpu";
-import { detectPose, detectSquats } from "../utils/poseDetection";
-
-export type Exercise = "squats";
+import {
+  configurePose,
+  defaultCoords,
+  detectPose,
+  detectSquats,
+  drawPose,
+  Exercise,
+  faceKeypoints,
+} from "../utils/poseDetection";
 
 type VideoData = {
   video?: HTMLVideoElement | null;
   canvas?: HTMLCanvasElement | null;
   exerciseToDetect?: Exercise;
-};
-
-export const CANVAS_SIZE = {
-  width: 600,
-  height: 800,
 };
 
 export const usePoseDetection = ({
@@ -33,6 +34,8 @@ export const usePoseDetection = ({
 
   const requestRef = useRef(0);
   const previousTimeRef = useRef(0);
+
+  const coords = useRef(defaultCoords);
 
   const ctx = useMemo(() => canvas?.getContext("2d") ?? null, [canvas]);
 
@@ -49,17 +52,23 @@ export const usePoseDetection = ({
         ctx &&
         detecting
       ) {
-        const pose = await detectPose(detector, video, ctx);
-        if (exerciseToDetect === "squats" && pose) {
-          detectSquats(
-            pose,
-            repInProgress,
-            () => setRepInProgress(true),
-            () => {
-              setRepInProgress(false);
-              setTotalReps((r) => r + 1);
-            }
-          );
+        const pose = await detectPose(detector, video);
+
+        if (pose) {
+          const poseConfigured = configurePose(pose, coords);
+          drawPose(poseConfigured, ctx, video, faceKeypoints);
+
+          if (exerciseToDetect === "squats") {
+            detectSquats(
+              poseConfigured,
+              repInProgress,
+              () => setRepInProgress(true),
+              () => {
+                setRepInProgress(false);
+                setTotalReps((r) => r + 1);
+              }
+            );
+          }
         }
       }
       previousTimeRef.current = time;
