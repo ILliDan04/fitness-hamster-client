@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
-import { CANVAS_SIZE } from "./usePoseDetection";
+
 import { useScreenOrientation } from "./useScreenOrientation";
+import { CANVAS_SIZE } from "@/utils/poseDetection";
 
 const ASPECT_RATIO = 4 / 3;
 

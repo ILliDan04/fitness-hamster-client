@@ -7,8 +7,8 @@ import {
 } from "react";
 
 import { useWebcam } from "@/hooks/useWebcam";
-import { CANVAS_SIZE } from "@/hooks/usePoseDetection";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { CANVAS_SIZE } from "@/utils/poseDetection";
 
 export type VideoCaptureRef = {
   canvas?: HTMLCanvasElement | null;
@@ -59,35 +59,33 @@ const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
 
   return (
     <div>
-      <div className="container">
-        <div className="relative">
-          {!canRecord && (
-            <p className="text-yellow-600">
-              Please use the default orientation of your device
-            </p>
-          )}
-          {isError && (
-            <p
-              className="text-red-400 w-full bg-white"
-              style={{ height: containerHeight }}
-            >
-              {error}
-            </p>
-          )}
-          <video
-            ref={videoRef}
-            playsInline
-            className={`absolute w-full ${isError ? "hidden" : ""}`}
-            muted
-            preload="none"
-          />
-          <canvas
-            ref={canvasRef}
-            width={CANVAS_SIZE.width}
-            height={CANVAS_SIZE.height}
-            className={`absolute w-full z-10 ${isError ? "hidden" : ""}`}
-          />
-        </div>
+      <div className="relative" style={{ height: containerHeight }}>
+        {!canRecord && (
+          <p className="text-yellow-600">
+            Please use the default orientation of your device
+          </p>
+        )}
+        {isError && (
+          <p
+            className="text-red-400 w-full bg-white"
+            style={{ height: containerHeight }}
+          >
+            {error}
+          </p>
+        )}
+        <video
+          ref={videoRef}
+          playsInline
+          className={`absolute w-full ${isError ? "hidden" : ""}`}
+          muted
+          preload="none"
+        />
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_SIZE.width}
+          height={CANVAS_SIZE.height}
+          className={`absolute w-full z-10 ${isError ? "hidden" : ""}`}
+        />
       </div>
     </div>
   );

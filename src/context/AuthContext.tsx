@@ -57,7 +57,13 @@ const AuthContextProvider = ({ children }: PropsWithChildren) => {
   }, [navigate, signedIn]);
 
   const signIn = useCallback(async () => {
-    if (!wallet || signedIn) return;
+    if (!wallet) return;
+
+    if (signedIn) {
+      await navigate({ to: "/" });
+      return;
+    }
+
     try {
       await wallet.signIn();
       await navigate({ to: "/login" });
@@ -67,7 +73,7 @@ const AuthContextProvider = ({ children }: PropsWithChildren) => {
   }, [wallet, navigate, signedIn]);
 
   const signOut = useCallback(async () => {
-    if (!wallet || signedIn) return;
+    if (!wallet || !signedIn) return;
     await wallet.signOut();
     setAccount(null);
     setSignedIn(false);
