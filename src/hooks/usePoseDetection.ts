@@ -27,6 +27,7 @@ export const usePoseDetection = ({
   video,
   exerciseToDetect,
 }: VideoData) => {
+  const [progress, setProgress] = useState(0);
   const [totalReps, setTotalReps] = useState(0);
   const [repInProgress, setRepInProgress] = useState(false);
   const [detecting, setDetecting] = useState(false);
@@ -59,7 +60,7 @@ export const usePoseDetection = ({
           drawPose(poseConfigured, ctx, video, faceKeypoints);
 
           if (exerciseToDetect === "squats") {
-            detectSquats(
+            const progress = detectSquats(
               poseConfigured,
               repInProgress,
               () => setRepInProgress(true),
@@ -68,6 +69,9 @@ export const usePoseDetection = ({
                 setTotalReps((r) => r + 1);
               }
             );
+            if (progress) {
+              setProgress(progress);
+            }
           }
         }
       }
@@ -99,5 +103,5 @@ export const usePoseDetection = ({
     init();
   }, []);
 
-  return { detecting, start, stop, toggle, totalReps };
+  return { detecting, start, stop, toggle, totalReps, progress };
 };
