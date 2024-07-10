@@ -197,6 +197,11 @@ export const detectSquats = (
   } else if (leftAngle > 160 && rightAngle > 160 && repInProgress) {
     onSquatFinished();
   }
+
+  return Math.min(
+    Math.round((5 / 6) * (180 - Math.max(rightAngle, leftAngle))),
+    100
+  );
 };
 
 export const configurePose = (
