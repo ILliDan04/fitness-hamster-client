@@ -1,15 +1,28 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen.ts";
+import App from "./App.tsx";
 import "./index.css";
+import { TonConnectUIProvider } from "@tonconnect/ui-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AuthProvider from "./context/AuthProvider.tsx";
 
-const router = createRouter({ routeTree });
+const queryClient = new QueryClient();
 
 const rootElement = document.getElementById("root")!;
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <TonConnectUIProvider
+      manifestUrl={"https://192.168.18.201:3000/tonconnect-manifest.json"}
+      actionsConfiguration={{
+        twaReturnUrl: `https://t.me/${import.meta.env.VITE_TELEGRAM_APP}`,
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </QueryClientProvider>
+    </TonConnectUIProvider>
   </React.StrictMode>
 );

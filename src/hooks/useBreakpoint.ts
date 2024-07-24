@@ -36,5 +36,10 @@ export const useBreakpoint = () => {
     return CONTAINER_SIZE[breakpoint];
   }, [breakpoint]);
 
-  return { breakpoint, width };
+  const videoHeight = useMemo(
+    () => (width === "100%" ? "133.333333333vw" : `${(width * 4) / 3}px`),
+    [width]
+  );
+
+  return { breakpoint, width, videoHeight };
 };
