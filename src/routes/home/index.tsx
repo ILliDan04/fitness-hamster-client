@@ -4,7 +4,7 @@ import Logo from "@/components/icons/Logo";
 import Settings from "@/components/icons/Settings";
 import { Button } from "@/shadcn-components/ui/button";
 
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 const Home = () => {
   return (
@@ -19,8 +19,8 @@ const Home = () => {
             <Button icon={<Settings />} variant="square" />
           </div>
         </div>
-        <p className="text-center text-lg">Welcome to Fitton,</p>
-        <p className="text-center text-lg mb-8">Motherfucker!</p>
+        <p className="text-center text-lg mb-8">Welcome to Fitton, bro!</p>
+
         <ReferralLink />
       </div>
       <TasksDrawer />
@@ -28,12 +28,4 @@ const Home = () => {
   );
 };
 
-export const Route = createFileRoute("/home/")({
-  component: Home,
-  beforeLoad(ctx) {
-    if (!ctx.context.connectionRestored) return;
-    if (!ctx.context.wallet) {
-      throw redirect({ to: "/" });
-    }
-  },
-});
+export const Route = createFileRoute("/home/")({ component: Home });

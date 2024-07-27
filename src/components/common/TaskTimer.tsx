@@ -17,7 +17,11 @@ const TaskTimer = ({ exercise, isDone, isExpired }: Props) => {
     const { date_done } = exercise;
 
     if (isDone) {
-      return <span className="opacity-80">{dayjs(date_done).fromNow()}</span>;
+      return (
+        <span className="opacity-80">
+          {dayjs(date_done ?? undefined).fromNow()}
+        </span>
+      );
     }
     if (isExpired) {
       return <span className="opacity-80">Expired</span>;

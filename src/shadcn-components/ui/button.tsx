@@ -1,8 +1,9 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-
+import clickSound from "@/assets/sound/button.mp3";
 import { cn } from "@/shadcn-lib/utils";
+import { useAudio } from "@/hooks/useAudio";
 
 const buttonVariants = cva(
   "flex items-center justify-center whitespace-nowrap rounded-2xl text-sm font-medium transition-colors outline-none disabled:pointer-events-none disabled:opacity-50",
@@ -46,12 +47,29 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, icon, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const sound = useAudio(clickSound);
+
+    const onSoundEnd = React.useCallback(
+      () => (sound.currentTime = 0),
+      [sound]
+    );
+
+    React.useEffect(() => {
+      sound.addEventListener("ended", onSoundEnd);
+      return () => sound.removeEventListener("ended", onSoundEnd);
+    }, [sound, onSoundEnd]);
 
     return (
       <Comp
         className={cn("relative", buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
+        onClick={(e) => {
+          sound.pause();
+          sound.currentTime = 0;
+          sound.play();
+          props.onClick?.(e);
+        }}
       >
         {icon}
         {props.children}

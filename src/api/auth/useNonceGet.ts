@@ -5,9 +5,7 @@ const useNonceGet = () => {
   return useQuery({
     queryKey: ["nonce"],
     queryFn: async () => {
-      const { data, headers, config } = await api.get<string>("/auth/nonce");
-      console.log(headers, config);
-
+      const { data } = await api.get<string>("/auth/nonce");
       return data;
     },
   });

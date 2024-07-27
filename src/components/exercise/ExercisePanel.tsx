@@ -6,10 +6,12 @@ import { Button } from "@/shadcn-components/ui/button";
 import Cross from "../icons/Cross";
 import { useNavigate } from "@tanstack/react-router";
 import { useWebcam } from "@/hooks/useWebcam";
-import Book from "../icons/Book";
 import SoundOff from "../icons/SoundOff";
 import colors from "tailwindcss/colors";
 import useExercise from "@/hooks/useExercise";
+import repSoundSrc from "@/assets/sound/repetition.mp3";
+import ExerciseInfo from "./ExerciseInfo";
+import { useAudio } from "@/hooks/useAudio";
 
 type Props = {
   maxReps: number;
@@ -22,15 +24,23 @@ const ExercisePanel = ({ maxReps, exerciseName }: Props) => {
   const { stop } = useWebcam();
   const navigate = useNavigate();
 
+  const repSound = useAudio(repSoundSrc);
+
   const wrapper = useRef<HTMLDivElement | null>(null);
   const { videoHeight } = useBreakpoint();
 
   const onRepsChange = useCallback(() => {
+    if (soundOn) {
+      repSound.pause();
+      repSound.currentTime = 0;
+      repSound.play();
+    }
+
     wrapper.current?.animate(
       { background: ["#172554", "#84cc16", "#172554"] },
       { duration: 400, easing: "ease-in-out" }
     );
-  }, []);
+  }, [soundOn, repSound]);
 
   useEffect(() => {
     if (!exercise) return;
@@ -55,7 +65,7 @@ const ExercisePanel = ({ maxReps, exerciseName }: Props) => {
       </div>
       <div className="flex justify-around px-6">
         <div className="w-12 flex flex-col justify-between">
-          <Button icon={<Book />} variant="square" />
+          <ExerciseInfo exercise="SQUAT" />
           <Button
             icon={<SoundOff color={soundOn ? undefined : colors.slate[900]} />}
             variant={soundOn ? "square" : "square-active"}

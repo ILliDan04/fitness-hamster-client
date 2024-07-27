@@ -1,4 +1,4 @@
-import { authContext } from "@/context/NearAuthContext";
+import { authContext } from "@/context/AuthProvider";
 import { useContext } from "react";
 
 export const useAuth = () => {

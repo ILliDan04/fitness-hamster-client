@@ -1,0 +1,19 @@
+FROM node:20.14.0-alpine
+
+ENV VITE_BACKEND_URL=https://api.fitton.app
+ENV VITE_TELEGRAM_APP=fittonapp_bot/app
+ENV URL=https://fitton.app
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+RUN npm run build:prod
+RUN echo '"{"url": "'"$URL"'","name": "Fitton","iconUrl": "'"$URL"'/icon.png","termsOfUseUrl": "","privacyPolicyUrl": ""}"' > dist/tonconnect-manifest.json
+
+FROM nginx
+
+COPY --from=0 /app/dist /usr/share/nginx/html
+
+EXPOSE 80

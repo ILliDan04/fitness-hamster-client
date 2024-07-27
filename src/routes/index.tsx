@@ -3,19 +3,11 @@ import Logo from "@/components/icons/Logo";
 import SoundOff from "@/components/icons/SoundOff";
 import { useSound } from "@/hooks/useSound";
 import { Button } from "@/shadcn-components/ui/button";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useTonConnectUI } from "@tonconnect/ui-react";
-import { useCallback } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import colors from "tailwindcss/colors";
 
 const Index = () => {
   const { on, toggle } = useSound();
-  const [connectUI] = useTonConnectUI();
-
-  // connectUI.setConnectRequestParameters({ value: { tonProof: "" } });
-  const signIn = useCallback(async () => {
-    await connectUI.openModal();
-  }, [connectUI]);
 
   return (
     <div className="bg-star pb-12">
@@ -35,21 +27,8 @@ const Index = () => {
       <div className="px-4 pt-8 mb-6">
         <StartPageCarousel />
       </div>
-      <div>
-        <Button onClick={signIn} variant="red" size="lg" className="mx-auto">
-          Get early access
-        </Button>
-      </div>
     </div>
   );
 };
 
-export const Route = createFileRoute("/")({
-  component: Index,
-  beforeLoad: (ctx) => {
-    if (!ctx.context.connectionRestored) return;
-    if (ctx.context.wallet) {
-      throw redirect({ to: "/home" });
-    }
-  },
-});
+export const Route = createFileRoute("/")({ component: Index });

@@ -39,7 +39,7 @@ const StartPageSubtitle = ({ text, sound = [], head = true }: Props) => {
       onClick={text.length > 1 ? handleClick : undefined}
     >
       {!!head && (
-        <div>
+        <div className="w-2/5">
           <img src={headImg} />
         </div>
       )}

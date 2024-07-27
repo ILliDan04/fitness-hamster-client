@@ -11,6 +11,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { CANVAS_SIZE } from "@/utils/poseDetection";
 import NoCamerasSupported from "./NoCamerasSupported";
 import NoCamerasFound from "./NoCamerasFound";
+import { cn } from "@/shadcn-lib/utils";
 
 export type VideoCaptureRef = {
   canvas?: HTMLCanvasElement | null;
@@ -33,10 +34,18 @@ const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
   }));
 
   useEffect(() => {
-    if (mediaStream && videoRef.current) {
-      videoRef.current.srcObject = mediaStream;
-      videoRef.current.play();
-    }
+    if (!recording) return;
+  }, [recording]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!mediaStream || !video) return;
+
+    const cb = async () => {
+      video.srcObject = mediaStream;
+      await video.play();
+    };
+    cb();
   }, [mediaStream]);
 
   useEffect(() => {
@@ -52,7 +61,7 @@ const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
       <video
         ref={videoRef}
         playsInline
-        className={`absolute w-full ${hasError ? "hidden" : ""}`}
+        className={cn("absolute w-full", hasError ? "hidden" : "")}
         muted
         preload="none"
       />
@@ -60,7 +69,7 @@ const VideoCapture = forwardRef((_: Props, ref: React.Ref<VideoCaptureRef>) => {
         ref={canvasRef}
         width={CANVAS_SIZE.width}
         height={CANVAS_SIZE.height}
-        className={`absolute w-full z-10 ${hasError ? "hidden" : ""}`}
+        className={cn("absolute w-full z-10", hasError ? "hidden" : "")}
       />
     </div>
   );

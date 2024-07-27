@@ -19,12 +19,6 @@ export enum KeypointName {
   LEFT_ANKLE = "left_ankle",
   RIGHT_ANKLE = "right_ankle",
 }
-export type Exercise =
-  | "squats"
-  | "pushups"
-  | "lunges"
-  | "burpies"
-  | "mountain_climber";
 
 export type KeypointCoords = { x: number; y: number };
 export type PoseConfigured = Partial<Record<KeypointName, KeypointCoords>>;

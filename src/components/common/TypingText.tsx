@@ -20,11 +20,15 @@ const TypingText = ({ text, className, customTarget, sound }: Props) => {
   const [resultingText, setResultingText] = useState("");
 
   const reset = useCallback(() => {
+    if (sound) {
+      sound.pause();
+      sound.currentTime = 0;
+    }
     setIndex(0);
     setResultingText("");
     setFinished(false);
     setAudioStarted(false);
-  }, []);
+  }, [sound]);
 
   const printCB = useCallback(() => {
     if (index === text.length) {
@@ -42,11 +46,10 @@ const TypingText = ({ text, className, customTarget, sound }: Props) => {
       const entry = entries[0];
       setCanRender(entry.isIntersecting);
       if (!entry.isIntersecting && !finished) {
-        sound?.pause();
         reset();
       }
     },
-    [reset, finished, sound]
+    [reset, finished]
   );
 
   useEffect(() => {
@@ -76,7 +79,7 @@ const TypingText = ({ text, className, customTarget, sound }: Props) => {
 
     const observer = new IntersectionObserver(observerCb, {
       root: null,
-      threshold: 0.99,
+      threshold: 0.9,
       rootMargin: "0px",
     });
 
@@ -86,7 +89,7 @@ const TypingText = ({ text, className, customTarget, sound }: Props) => {
 
   useEffect(() => {
     reset();
-    return () => sound?.pause();
+    return () => reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, sound]);
 

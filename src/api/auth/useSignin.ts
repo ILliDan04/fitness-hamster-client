@@ -1,7 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import api from "..";
+import { SessionResponse } from "./useSession";
 
 type RequestParams = {
+  ref?: string;
   address: string;
   publicKey: string;
   proof: {
@@ -15,17 +17,12 @@ type RequestParams = {
   };
 };
 
-type SigninResponse = {
-  account_id: string;
-  address: string;
-  referral_account_id: string | null;
-  max_referrals: number;
-};
-
 const useSignin = () => {
   return useMutation({
-    mutationFn: async (data: RequestParams) => {
-      const res = await api.post<SigninResponse>("/auth/signin", data);
+    mutationFn: async ({ ref, ...data }: RequestParams) => {
+      const res = await api.post<SessionResponse>(`/auth/signin`, data, {
+        params: { ref },
+      });
       return res.data;
     },
   });

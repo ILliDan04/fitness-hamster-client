@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import Loader from "../icons/Loader";
 import { cn } from "@/shadcn-lib/utils";
+import logoLoading from "@/assets/logo_loading.svg";
 
 type Props = {
   loading?: boolean;
@@ -25,7 +25,7 @@ const LoadingFullScreen = ({ loading }: Props) => {
         loading ? "visible opacity-100" : "invisible opacity-0"
       )}
     >
-      <Loader size="2xl" />
+      <img src={logoLoading} />
     </div>
   );
 };

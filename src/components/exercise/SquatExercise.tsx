@@ -14,18 +14,28 @@ import { useNavigate } from "@tanstack/react-router";
 import { PoseChangeEvent } from "@/utils/PoseDetectionStatus";
 import LoadingFullScreen from "../common/LoadingFullScreen";
 import ExerciseContext from "@/context/ExerciseContext";
+import { useWebcam } from "@/hooks/useWebcam";
+import Countdown, { CountdownRef } from "../video/Countdown";
 
-const SquatExercise = () => {
+type Props = {
+  onDone?: () => Promise<void>;
+};
+
+const SquatExercise = ({ onDone }: Props) => {
   const navigate = useNavigate();
   const [completed, setCompleted] = useState(false);
 
   const videoCapture = useRef<VideoCaptureRef | null>(null);
+  const countdown = useRef<CountdownRef | null>(null);
   const status = useRef(new ExerciseStatus());
+
+  const [startedDetecting, setStartedDetecting] = useState(false);
 
   const detection = usePoseDetection({
     canvas: videoCapture.current?.canvas,
     video: videoCapture.current?.video,
   });
+  const { recording } = useWebcam();
 
   const detectSquats = useCallback(
     (poseConfigured: PoseConfigured) => {
@@ -78,6 +88,7 @@ const SquatExercise = () => {
 
   const poseChange = useCallback(
     (e: PoseChangeEvent) => {
+      setStartedDetecting(true);
       const { time, poseConfigured } = e.detail;
       status.current.setTime(time);
       detectSquats(poseConfigured);
@@ -86,10 +97,15 @@ const SquatExercise = () => {
   );
 
   const repsChange = useCallback((e: CustomEvent<number>) => {
-    if (e.detail === 2) {
+    if (e.detail === 20) {
       setCompleted(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!recording || !startedDetecting) return;
+    countdown.current?.run();
+  }, [recording, startedDetecting]);
 
   useEffect(() => {
     const target = status.current;
@@ -107,12 +123,17 @@ const SquatExercise = () => {
 
   useEffect(() => {
     if (!completed) return;
-    setTimeout(() => navigate({ to: "/home", from: "/exercise/$id" }), 2000);
-  }, [completed, navigate]);
+    const cb = async () => {
+      await onDone?.();
+      setTimeout(() => navigate({ to: "/home", from: "/exercise/$id" }), 2000);
+    };
+    cb();
+  }, [completed, navigate, onDone]);
 
   return (
     <div className="h-fill bg-blue-gradient">
       <LoadingFullScreen loading={!detection?.initialized} />
+      <Countdown ref={countdown} />
       <div
         className={cn(
           "fixed inset-0 bg-lime-500 z-50 justify-center items-center transition-opacity duration-300 ease-in-out opacity-0 invisible",
@@ -123,7 +144,7 @@ const SquatExercise = () => {
       </div>
       <ExerciseContext value={{ exercise: status.current, detection }}>
         <VideoCapture ref={videoCapture} />
-        <ExercisePanel maxReps={2} exerciseName="Squats" />
+        <ExercisePanel maxReps={20} exerciseName="Squats" />
       </ExerciseContext>
     </div>
   );
