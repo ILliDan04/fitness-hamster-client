@@ -11,6 +11,7 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   plugins: ["react-refresh", "react-hooks"],
   rules: {
+    "no-empty": ["error", { allowEmptyCatch: true }],
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     "@typescript-eslint/ban-types": [

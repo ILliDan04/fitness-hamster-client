@@ -1,107 +1,49 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  PoseDetector,
-  SupportedModels,
-  createDetector,
-} from "@tensorflow-models/pose-detection";
-import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgpu";
-import {
-  configurePose,
-  defaultCoords,
-  detectPose,
-  detectSquats,
-  drawPose,
-  Exercise,
-  faceKeypoints,
-} from "../utils/poseDetection";
+import { useCallback, useEffect, useRef, useState } from "react";
+import PoseDetectionStatus from "@/utils/PoseDetectionStatus";
+import { faceKeypoints } from "@/utils/poseDetection";
 
 type VideoData = {
   video?: HTMLVideoElement | null;
   canvas?: HTMLCanvasElement | null;
-  exerciseToDetect?: Exercise;
 };
 
-export const usePoseDetection = ({
-  canvas,
-  video,
-  exerciseToDetect,
-}: VideoData) => {
-  const [progress, setProgress] = useState(0);
-  const [totalReps, setTotalReps] = useState(0);
-  const [repInProgress, setRepInProgress] = useState(false);
-  const [detecting, setDetecting] = useState(false);
-  const [detector, setDetector] = useState<PoseDetector | null>(null);
-
+export const usePoseDetection = ({ canvas, video }: VideoData) => {
   const requestRef = useRef(0);
-  const previousTimeRef = useRef(0);
 
-  const coords = useRef(defaultCoords);
-
-  const ctx = useMemo(() => canvas?.getContext("2d") ?? null, [canvas]);
-
-  const start = useCallback(() => setDetecting(true), []);
-  const stop = useCallback(() => setDetecting(false), []);
-  const toggle = useCallback(() => setDetecting((value) => !value), []);
+  const [controllerObj, setControllerObj] =
+    useState<PoseDetectionStatus | null>(null);
 
   const run = useCallback(
     async (time: number) => {
-      if (
-        previousTimeRef.current != undefined &&
-        detector &&
-        video &&
-        ctx &&
-        detecting
-      ) {
-        const pose = await detectPose(detector, video);
+      if (!controllerObj || requestRef.current === -1) return;
 
-        if (pose) {
-          const poseConfigured = configurePose(pose, coords);
-          drawPose(poseConfigured, ctx, video, faceKeypoints);
-
-          if (exerciseToDetect === "squats") {
-            const progress = detectSquats(
-              poseConfigured,
-              repInProgress,
-              () => setRepInProgress(true),
-              () => {
-                setRepInProgress(false);
-                setTotalReps((r) => r + 1);
-              }
-            );
-            if (progress) {
-              setProgress(progress);
-            }
-          }
-        }
-      }
-      previousTimeRef.current = time;
+      await controllerObj.detectPose(time);
+      controllerObj.drawPose(faceKeypoints);
       requestRef.current = requestAnimationFrame(run);
     },
-    [ctx, detecting, detector, exerciseToDetect, repInProgress, video]
+    [controllerObj]
   );
 
   useEffect(() => {
+    if (!controllerObj || !controllerObj.initialized) return;
+
     requestRef.current = requestAnimationFrame(run);
     return () => cancelAnimationFrame(requestRef.current);
-  }, [run]);
+  }, [controllerObj, run]);
 
   useEffect(() => {
-    const init = async () => {
-      if (tf.engine().findBackend("webgpu")) {
-        await tf.setBackend("webgpu");
-      } else if (tf.engine().findBackend("webgl")) {
-        await tf.setBackend("webgl");
-      } else {
-        await tf.setBackend("cpu");
-      }
-      await tf.ready();
+    if (!video || !canvas) return;
 
-      const detector = await createDetector(SupportedModels.MoveNet);
-      setDetector(detector);
+    const init = async () => {
+      await PoseDetectionStatus.initDetector();
+      const controller = new PoseDetectionStatus(canvas, video);
+      setControllerObj(controller);
     };
     init();
-  }, []);
+  }, [canvas, video]);
 
-  return { detecting, start, stop, toggle, totalReps, progress };
+  return controllerObj;
 };
+
+export type UsePoseDetectionReturn = ReturnType<typeof usePoseDetection>;
