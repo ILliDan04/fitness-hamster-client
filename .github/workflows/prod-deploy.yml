@@ -1,0 +1,27 @@
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          docker build -f Dockerfile.prod \
+            --build-arg VITE_BACKEND_URL=${{secrets.VITE_BACKEND_URL_PROD}} \
+            --build-arg VITE_TELEGRAM_APP=${{secrets.VITE_TELEGRAM_APP_PROD}} \ 
+            --build-arg URL=${{secrets.URL_PROD}} \
+            -t ghcr.io/illidan04/fitton-client-prod:$GITHUB_REF_NAME .
+
+      - name: Login to GHCR
+        run: docker login ghcr.io -u illidan -p ${{secrets.GHCR_KEY}}
+
+      - name: Push image
+        run: docker push ghcr.io/illidan04/fitton-client-prod:$GITHUB_REF_NAME
+
+      
