@@ -1,8 +1,8 @@
 FROM node:20.14.0-alpine
 
-ENV VITE_BACKEND_URL=https://api.fitton.app
-ENV VITE_TELEGRAM_APP=fittonapp_bot/app
-ENV URL=https://fitton.app
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+ENV VITE_TELEGRAM_APP=$VITE_TELEGRAM_APP
+ENV URL=$URL
 
 WORKDIR /app
 
