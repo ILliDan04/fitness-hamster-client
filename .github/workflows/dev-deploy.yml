@@ -1,0 +1,27 @@
+on:
+  pull_request:
+    branches: ["dev-deploy"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          docker build -f Dockerfile.dev \
+            --build-arg VITE_BACKEND_URL=${{secrets.VITE_BACKEND_URL_DEV}} \
+            --build-arg VITE_TELEGRAM_APP=${{secrets.VITE_TELEGRAM_APP_DEV}} \ 
+            --build-arg URL=${{secrets.URL_DEV}} \
+            -t ghcr.io/illidan04/fitton-client-dev:latest .
+
+      - name: Login to GHCR
+        run: docker login ghcr.io -u illidan -p ${{secrets.GHCR_KEY}}
+
+      - name: Push image
+        run: docker push ghcr.io/illidan04/fitton-client-dev:latest
+
+      
