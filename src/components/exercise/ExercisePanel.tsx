@@ -12,13 +12,14 @@ import useExercise from "@/hooks/useExercise";
 import repSoundSrc from "@/assets/sound/repetition.mp3";
 import ExerciseInfo from "./ExerciseInfo";
 import { useAudio } from "@/hooks/useAudio";
+import { Exercise, EXERCISE_LABEL } from "@/utils/exercises";
 
 type Props = {
   maxReps: number;
-  exerciseName: string;
+  exercise: Exercise;
 };
 
-const ExercisePanel = ({ maxReps, exerciseName }: Props) => {
+const ExercisePanel = ({ maxReps, exercise: exerciseType }: Props) => {
   const { exercise } = useExercise();
   const [soundOn, setSoundOn] = useState(true);
   const { stop } = useWebcam();
@@ -61,11 +62,11 @@ const ExercisePanel = ({ maxReps, exerciseName }: Props) => {
       ref={wrapper}
     >
       <div className="text-center font-extrabold text-xl pb-6">
-        {exerciseName}
+        {EXERCISE_LABEL[exerciseType]}
       </div>
       <div className="flex justify-around px-6">
         <div className="w-12 flex flex-col justify-between">
-          <ExerciseInfo exercise="SQUAT" />
+          <ExerciseInfo exercise={exerciseType} />
           <Button
             icon={<SoundOff color={soundOn ? undefined : colors.slate[900]} />}
             variant={soundOn ? "square" : "square-active"}

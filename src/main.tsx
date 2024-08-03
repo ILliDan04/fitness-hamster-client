@@ -4,10 +4,7 @@ import "./index.css";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen.ts";
 
-const router = createRouter({
-  routeTree,
-  context: { wallet: null, connectionRestored: false, auth: null },
-});
+const router = createRouter({ routeTree });
 
 const rootElement = document.getElementById("root")!;
 const root = ReactDOM.createRoot(rootElement);

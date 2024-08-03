@@ -21,6 +21,8 @@ type Props = {
   onDone?: () => Promise<void>;
 };
 
+const MAX_REPS = 20;
+
 const SquatExercise = ({ onDone }: Props) => {
   const navigate = useNavigate();
   const [completed, setCompleted] = useState(false);
@@ -97,7 +99,7 @@ const SquatExercise = ({ onDone }: Props) => {
   );
 
   const repsChange = useCallback((e: CustomEvent<number>) => {
-    if (e.detail === 20) {
+    if (e.detail === MAX_REPS) {
       setCompleted(true);
     }
   }, []);
@@ -144,7 +146,7 @@ const SquatExercise = ({ onDone }: Props) => {
       </div>
       <ExerciseContext value={{ exercise: status.current, detection }}>
         <VideoCapture ref={videoCapture} />
-        <ExercisePanel maxReps={20} exerciseName="Squats" />
+        <ExercisePanel maxReps={MAX_REPS} exercise="SQUAT" />
       </ExerciseContext>
     </div>
   );
