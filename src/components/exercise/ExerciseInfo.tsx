@@ -9,9 +9,12 @@ import {
   DialogClose,
 } from "@/shadcn-components/ui/dialog";
 import Book from "../icons/Book";
-import squatsVideo from "@/assets/exercises/squats.webm";
-
-import { Exercise, EXERCISE_LABEL } from "@/utils/exercises";
+import {
+  Exercise,
+  EXERCISE_DESC,
+  EXERCISE_LABEL,
+  EXERCISE_VIDEO,
+} from "@/utils/exercises";
 
 type Props = {
   exercise: Exercise;
@@ -20,23 +23,28 @@ type Props = {
 const ExerciseInfo = ({ exercise }: Props) => {
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button icon={<Book />} variant="square" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{EXERCISE_LABEL[exercise]} guide</DialogTitle>
         </DialogHeader>
-        <div className="my-4">
-          <video src={squatsVideo} loop autoPlay />
+        <div className="my-4 mx-auto w-1/3">
+          <video loop autoPlay playsInline muted>
+            <source
+              src={EXERCISE_VIDEO[exercise][0]}
+              type="video/mp4;codecs=hvc1"
+            />
+            <source
+              src={EXERCISE_VIDEO[exercise][1]}
+              type="video/webm;codecs=vp9"
+            />
+          </video>
         </div>
-        <p className="mb-8">
-          Stand with feet shoulder-width apart, lower by bending knees, keep
-          back straight, chest up, thighs parallel to ground, push through heels
-          to stand.
-        </p>
+        <p className="mb-8">{EXERCISE_DESC[exercise]}</p>
         <DialogFooter>
-          <DialogClose>
+          <DialogClose asChild>
             <Button variant="yellow" size="md" className="px-12 mx-auto">
               Ok
             </Button>

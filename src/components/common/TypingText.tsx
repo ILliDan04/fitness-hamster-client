@@ -88,10 +88,8 @@ const TypingText = ({ text, className, customTarget, sound }: Props) => {
   }, [renderElem, observerCb, customTarget]);
 
   useEffect(() => {
-    reset();
-    return () => reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, sound]);
+    return reset;
+  }, [text, reset]);
 
   useEffect(() => {
     if (!canRender) return;
